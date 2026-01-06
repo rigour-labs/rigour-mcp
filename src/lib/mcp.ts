@@ -3,7 +3,7 @@ import {
     CallToolRequestSchema,
     ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
-import { GateRunner, ConfigSchema } from "@rigour-labs/core";
+import { GateRunner, ConfigSchema, RetryLoopBreakerGate } from "@rigour-labs/core";
 import fs from "node:fs/promises";
 import path from "node:path";
 import yaml from "yaml";
@@ -89,6 +89,46 @@ export function createMcpServer() {
                             },
                         },
                         required: ["cwd"],
+                    },
+                },
+                {
+                    name: "rigour_record_failure",
+                    description: "Record an operation failure to track retry loops and prompt for documentation consult.",
+                    inputSchema: {
+                        type: "object",
+                        properties: {
+                            cwd: {
+                                type: "string",
+                                description: "Absolute path to the project root.",
+                            },
+                            errorMessage: {
+                                type: "string",
+                                description: "The error message or type (e.g., 'Deployment failed').",
+                            },
+                            category: {
+                                type: "string",
+                                description: "Optional category (deployment, runtime_error, network, etc.). Auto-classified if omitted.",
+                            },
+                        },
+                        required: ["cwd", "errorMessage"],
+                    },
+                },
+                {
+                    name: "rigour_clear_failure",
+                    description: "Clear failure history for a category after a successful operation or manual fix.",
+                    inputSchema: {
+                        type: "object",
+                        properties: {
+                            cwd: {
+                                type: "string",
+                                description: "Absolute path to the project root.",
+                            },
+                            category: {
+                                type: "string",
+                                description: "The failure category to clear (e.g., 'deployment').",
+                            },
+                        },
+                        required: ["cwd", "category"],
                     },
                 },
             ],
@@ -190,6 +230,32 @@ export function createMcpServer() {
                             {
                                 type: "text",
                                 text: `ENGINEERING REFINEMENT REQUIRED:\n\nThe project state violated ${report.failures.length} quality gates. You MUST address these failures before declaring the task complete:\n\n${packet}`,
+                            },
+                        ],
+                    };
+                }
+
+                case "rigour_record_failure": {
+                    const { errorMessage, category } = args as any;
+                    await RetryLoopBreakerGate.recordFailure(cwd, errorMessage, category);
+                    return {
+                        content: [
+                            {
+                                type: "text",
+                                text: `FAILURE RECORDED: ${category || 'auto-classified'}\nError: ${errorMessage}`,
+                            },
+                        ],
+                    };
+                }
+
+                case "rigour_clear_failure": {
+                    const { category } = args as any;
+                    await RetryLoopBreakerGate.clearFailure(cwd, category);
+                    return {
+                        content: [
+                            {
+                                type: "text",
+                                text: `FAILURE CLEARED: ${category}`,
                             },
                         ],
                     };

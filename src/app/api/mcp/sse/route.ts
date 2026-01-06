@@ -1,6 +1,7 @@
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 import { createMcpServer } from "@/lib/mcp";
 import { NextRequest } from "next/server";
+import { isAuthorized } from "@/lib/auth";
 
 // Store active transports to send messages back
 export const transports = new Map<string, SSEServerTransport>();
@@ -8,6 +9,10 @@ export const transports = new Map<string, SSEServerTransport>();
 export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
+    if (!isAuthorized(request)) {
+        return new Response("Unauthorized", { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const sessionId = searchParams.get("sessionId");
 

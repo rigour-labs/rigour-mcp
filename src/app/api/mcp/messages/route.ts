@@ -1,7 +1,12 @@
 import { NextRequest } from "next/server";
 import { transports } from "../sse/route";
+import { isAuthorized } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
+    if (!isAuthorized(request)) {
+        return new Response("Unauthorized", { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const sessionId = searchParams.get("sessionId");
 
