@@ -4,7 +4,7 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "dev": "tsx api/index.ts"
+        "dev": "tsx index.ts"
     },
     "dependencies": {
         "@hono/mcp": "^0.1.5",
