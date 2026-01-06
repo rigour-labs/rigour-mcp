@@ -1,31 +1,21 @@
 {
     "name": "rigour-mcp",
     "version": "1.0.0",
-    "description": "Remote MCP server for Rigour - Deploy quality gates over HTTP",
-    "main": "dist/api/index.js",
+    "private": true,
     "type": "module",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/rigour-labs/rigour-mcp"
-    },
     "scripts": {
-        "build": "tsc",
-        "start": "node dist/api/index.js",
         "dev": "tsx api/index.ts"
     },
     "dependencies": {
-        "@hono/mcp": "^0.1.0",
+        "@hono/mcp": "^0.1.5",
         "@modelcontextprotocol/sdk": "^1.12.0",
         "@rigour-labs/core": "^1.0.0",
         "hono": "^4.7.11",
         "yaml": "^2.8.2"
     },
     "devDependencies": {
-        "@types/node": "^25.0.3",
+        "@types/node": "^22.0.0",
         "tsx": "^4.19.2",
         "typescript": "^5.7.3"
-    },
-    "engines": {
-        "node": ">=18"
     }
 }

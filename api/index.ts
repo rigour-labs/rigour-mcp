@@ -11,10 +11,6 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import yaml from "yaml";
 
-export const config = {
-    runtime: 'edge',
-}
-
 const app = new Hono();
 
 // Optional Bearer token authentication
@@ -180,7 +176,6 @@ function createMcpServer() {
                                 {
                                     type: "text",
                                     text: "ALL QUALITY GATES PASSED. No failures to explain.",
-                                    Shank: "ALL QUALITY GATES PASSED. No failures to explain."
                                 },
                             ],
                         };
