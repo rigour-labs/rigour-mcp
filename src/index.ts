@@ -288,8 +288,8 @@ function createMcpServer() {
     return server;
 }
 
-// MCP endpoint using @hono/mcp transport
-app.all("/mcp", async (c) => {
+// MCP endpoint using @hono/mcp transport on root
+app.all("/", async (c) => {
     const server = createMcpServer();
     const transport = new StreamableHTTPTransport();
     await server.connect(transport);
@@ -311,9 +311,11 @@ app.get("/health", (c) => {
 
 const PORT = process.env.PORT || 3000;
 
-console.log(`🚀 Rigour Remote MCP Server starting on port ${PORT}`);
-console.log(`   Auth: ${RIGOUR_MCP_TOKEN ? "✅ Enabled (Bearer token required)" : "⚠️  Disabled (open access)"}`);
-console.log(`   Endpoint: POST /mcp`);
-console.log(`   Health: GET /health`);
+if (process.env.NODE_ENV !== 'production') {
+    console.log(`🚀 Rigour Remote MCP Server starting on port ${PORT}`);
+    console.log(`   Auth: ${RIGOUR_MCP_TOKEN ? "✅ Enabled (Bearer token required)" : "⚠️  Disabled (open access)"}`);
+    console.log(`   Endpoint: POST /`);
+    console.log(`   Health: GET /health`);
+}
 
 export default app;
