@@ -2,9 +2,8 @@
     "name": "rigour-mcp",
     "version": "1.0.0",
     "private": true,
-    "type": "module",
     "scripts": {
-        "build": "esbuild api/index.ts --bundle --platform=node --target=node18 --format=esm --outfile=api/index.js --banner:js=\"import { createRequire } from 'module'; const require = createRequire(import.meta.url);\" --external:fsevents",
+        "build": "esbuild api/index.ts --bundle --platform=node --target=node18 --format=cjs --outfile=api/index.js --external:fsevents",
         "dev": "tsx api/index.ts"
     },
     "engines": {
