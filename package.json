@@ -4,8 +4,8 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "build": "esbuild src/index.ts --bundle --platform=node --format=esm --outfile=api/index.js --external:fsevents",
-        "dev": "tsx src/index.ts"
+        "build": "esbuild api/index.ts --bundle --platform=node --target=node18 --format=esm --outfile=api/index.js --banner:js=\"import { createRequire } from 'module'; const require = createRequire(import.meta.url);\" --external:fsevents",
+        "dev": "tsx api/index.ts"
     },
     "engines": {
         "node": ">=18"
