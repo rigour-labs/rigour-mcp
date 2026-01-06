@@ -3,8 +3,8 @@
     "version": "1.0.0",
     "private": true,
     "scripts": {
-        "build": "esbuild api/index.ts --bundle --platform=node --target=node18 --format=cjs --outfile=api/index.js --external:fsevents",
-        "dev": "tsx api/index.ts"
+        "build": "esbuild src/index.ts --bundle --platform=node --target=node18 --format=cjs --outfile=api/index.js --external:fsevents",
+        "dev": "tsx src/index.ts"
     },
     "engines": {
         "node": ">=18"
