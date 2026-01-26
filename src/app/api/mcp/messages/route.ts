@@ -22,9 +22,30 @@ export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
         await transport.handlePostMessage(request as any, body);
-        return new Response("OK", { status: 200 });
+        return new Response("OK", {
+            status: 200,
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+            },
+        });
     } catch (error: any) {
         console.error("Error handling MCP message:", error);
-        return new Response(error.message, { status: 500 });
+        return new Response(error.message, {
+            status: 500,
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+            },
+        });
     }
+}
+
+export async function OPTIONS() {
+    return new Response(null, {
+        status: 204,
+        headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization",
+        },
+    });
 }

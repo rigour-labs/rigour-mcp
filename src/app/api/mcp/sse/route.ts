@@ -58,11 +58,25 @@ export async function GET(request: NextRequest) {
     const mcpServer = createMcpServer();
     await mcpServer.connect(transport);
 
-    return new Response(responseStream.readable, {
+    const headers = new Headers({
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache, no-transform",
+        "Connection": "keep-alive",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    });
+
+    return new Response(responseStream.readable, { headers });
+}
+
+export async function OPTIONS() {
+    return new Response(null, {
+        status: 204,
         headers: {
-            "Content-Type": "text/event-stream",
-            "Cache-Control": "no-cache, no-transform",
-            "Connection": "keep-alive",
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization",
         },
     });
 }

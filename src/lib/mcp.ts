@@ -13,7 +13,10 @@ async function loadConfig(cwd: string) {
     try {
         await fs.access(configPath);
     } catch {
-        throw new Error("Rigour configuration (rigour.yml) not found. The agent must run `rigour init` first to establish engineering standards.");
+        throw new Error(`Rigour configuration (rigour.yml) not found at ${configPath}. 
+NOTE: This MCP server is running REMOTELY and cannot see your local filesystem. 
+If you are running this locally, ensure 'rigour init' has been run. 
+If you are using the remote Vercel instance, it will only work for projects it has native access to or via CLI mode.`);
     }
     const configContent = await fs.readFile(configPath, "utf-8");
     return ConfigSchema.parse(yaml.parse(configContent));
@@ -139,6 +142,8 @@ export function createMcpServer() {
         const { name, arguments: args } = request.params;
         const cwd = (args as any)?.cwd || process.cwd();
 
+        console.log(`[MCP] Tool Call: ${name}`, { args, cwd });
+
         try {
             const config = await loadConfig(cwd);
             const runner = new GateRunner(config);
@@ -146,6 +151,7 @@ export function createMcpServer() {
             switch (name) {
                 case "rigour_check": {
                     const report = await runner.run(cwd);
+                    console.log(`[MCP] rigour_check result: ${report.status}`);
                     return {
                         content: [
                             {
@@ -265,6 +271,7 @@ export function createMcpServer() {
                     throw new Error(`Unknown tool: ${name}`);
             }
         } catch (error: any) {
+            console.error(`[MCP] Error in tool ${name}:`, error.message);
             return {
                 content: [
                     {
@@ -277,5 +284,6 @@ export function createMcpServer() {
         }
     });
 
+    console.log("[MCP] Server handlers initialized");
     return server;
 }
