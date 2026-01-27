@@ -15,12 +15,12 @@ export default function Home() {
           <div>
             <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-2">Setup Instructions</h2>
             <p className="text-zinc-600 dark:text-zinc-400">
-              To connect this MCP server to Claude AI, Antigravity, or other MCP-compatible tools, use the following URL:
+              Connect this MCP server to Claude AI, Antigravity, or other MCP-compatible tools:
             </p>
           </div>
 
           <div className="bg-zinc-100 dark:bg-black rounded-xl p-4 font-mono text-sm break-all border border-zinc-200 dark:border-zinc-800 flex justify-between items-center group">
-            <code id="mcp-url" className="text-indigo-600 dark:text-indigo-400">https://mcp.rigour.run/api/mcp/sse</code>
+            <code id="mcp-url" className="text-indigo-600 dark:text-indigo-400">https://mcp.rigour.run/api/mcp</code>
           </div>
 
           <div className="space-y-4">
@@ -33,16 +33,17 @@ export default function Home() {
             <div className="flex gap-4">
               <div className="flex-shrink-0 w-6 h-6 rounded-full bg-zinc-200 dark:bg-zinc-800 text-xs flex items-center justify-center font-bold">2</div>
               <p className="text-zinc-600 dark:text-zinc-400 text-sm">
-                Choose <span className="font-semibold text-zinc-900 dark:text-zinc-100">SSE</span> as the transport type.
+                Choose <span className="font-semibold text-zinc-900 dark:text-zinc-100">Streamable HTTP</span> as the transport type.
               </p>
             </div>
             <div className="flex gap-4">
               <div className="flex-shrink-0 w-6 h-6 rounded-full bg-zinc-200 dark:bg-zinc-800 text-xs flex items-center justify-center font-bold">3</div>
               <p className="text-zinc-600 dark:text-zinc-400 text-sm">
-                Paste the URL above. No session ID is required; it will be automatically handled.
+                Paste the URL above. This server runs in stateless mode for maximum reliability.
               </p>
             </div>
           </div>
+
 
           <div className="pt-6 border-t border-zinc-100 dark:border-zinc-800 flex justify-between items-center">
             <div className="flex items-center gap-2">
