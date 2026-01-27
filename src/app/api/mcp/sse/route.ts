@@ -1,10 +1,9 @@
-import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
+import { transports } from "@/lib/state";
+import { POST as handleMessagePost } from "../messages/route";
 import { createMcpServer } from "@/lib/mcp";
 import { NextRequest } from "next/server";
 import { isAuthorized } from "@/lib/auth";
-
-// Store active transports to send messages back
-export const transports = new Map<string, SSEServerTransport>();
+import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 
 export const dynamic = "force-dynamic";
 
@@ -69,6 +68,11 @@ export async function GET(request: NextRequest) {
     });
 
     return new Response(responseStream.readable, { headers });
+}
+
+export async function POST(request: NextRequest) {
+    console.log(`[MCP] POST fallback to SSE route for ${request.url}`);
+    return handleMessagePost(request);
 }
 
 export async function OPTIONS() {

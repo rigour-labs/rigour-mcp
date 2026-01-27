@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { transports } from "../sse/route";
+import { transports } from "@/lib/state";
 import { isAuthorized } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
@@ -16,7 +16,8 @@ export async function POST(request: NextRequest) {
 
     const transport = transports.get(sessionId);
     if (!transport) {
-        return new Response("Session not found", { status: 404 });
+        console.warn(`[MCP] Session not found: ${sessionId}. Active sessions: ${Array.from(transports.keys()).join(", ")}`);
+        return new Response("Session not found (Server might have restarted or session expired)", { status: 404 });
     }
 
     try {
