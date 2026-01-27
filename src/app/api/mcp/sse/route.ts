@@ -14,10 +14,10 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const sessionId = searchParams.get("sessionId");
+    let sessionId = searchParams.get("sessionId");
 
     if (!sessionId) {
-        return new Response("Missing sessionId", { status: 400 });
+        sessionId = crypto.randomUUID();
     }
 
     request.signal.addEventListener("abort", () => {
@@ -63,8 +63,9 @@ export async function GET(request: NextRequest) {
         "Cache-Control": "no-cache, no-transform",
         "Connection": "keep-alive",
         "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization",
+        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Session-Id",
+        "X-Accel-Buffering": "no", // Disable buffering for Vercel/Nginx
     });
 
     return new Response(responseStream.readable, { headers });
