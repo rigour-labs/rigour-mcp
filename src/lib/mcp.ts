@@ -7,6 +7,7 @@ import { GateRunner, ConfigSchema, RetryLoopBreakerGate } from "@rigour-labs/cor
 import fs from "node:fs/promises";
 import path from "node:path";
 import yaml from "yaml";
+import { randomUUID } from "node:crypto";
 
 async function loadConfig(cwd: string) {
     const configPath = path.join(cwd, "rigour.yml");
@@ -20,6 +21,23 @@ If you are using the remote Vercel instance, it will only work for projects it h
     }
     const configContent = await fs.readFile(configPath, "utf-8");
     return ConfigSchema.parse(yaml.parse(configContent));
+}
+
+// Helper to log events for Rigour Studio
+async function logStudioEvent(cwd: string, event: any) {
+    try {
+        const rigourDir = path.join(cwd, ".rigour");
+        await fs.mkdir(rigourDir, { recursive: true });
+        const eventsPath = path.join(rigourDir, "events.jsonl");
+        const logEntry = JSON.stringify({
+            id: randomUUID(),
+            timestamp: new Date().toISOString(),
+            ...event
+        }) + "\n";
+        await fs.appendFile(eventsPath, logEntry);
+    } catch {
+        // Silent fail
+    }
 }
 
 // Memory persistence for context retention
@@ -228,6 +246,14 @@ export function createMcpServer() {
 
         console.log(`[MCP] Tool Call: ${name}`, { args, cwd });
 
+        const requestId = randomUUID();
+        await logStudioEvent(cwd, {
+            type: "tool_call",
+            requestId,
+            tool: name,
+            arguments: args
+        });
+
         try {
             const config = await loadConfig(cwd);
             const runner = new GateRunner(config);
@@ -235,7 +261,14 @@ export function createMcpServer() {
             switch (name) {
                 case "rigour_check": {
                     const report = await runner.run(cwd);
-                    console.log(`[MCP] rigour_check result: ${report.status}`);
+                    await logStudioEvent(cwd, {
+                        type: "tool_response",
+                        requestId,
+                        tool: name,
+                        status: report.status === 'PASS' ? 'success' : 'error',
+                        content: [{ type: "text", text: `Audit Result: ${report.status}` }],
+                        _rigour_report: report
+                    });
                     return {
                         content: [
                             {
@@ -359,7 +392,13 @@ export function createMcpServer() {
                         timestamp: new Date().toISOString(),
                     };
                     await saveMemory(cwd, store);
-                    console.log(`[MCP] Memory stored: ${key}`);
+                    await logStudioEvent(cwd, {
+                        type: "tool_response",
+                        requestId,
+                        tool: name,
+                        status: "success",
+                        content: [{ type: "text", text: `Memory stored: ${key}` }]
+                    });
                     return {
                         content: [
                             {
@@ -458,6 +497,13 @@ export function createMcpServer() {
             }
         } catch (error: any) {
             console.error(`[MCP] Error in tool ${name}:`, error.message);
+            await logStudioEvent(cwd, {
+                type: "tool_response",
+                requestId,
+                tool: name,
+                status: "error",
+                content: [{ type: "text", text: `RIGOUR ERROR: ${error.message}` }]
+            });
             return {
                 content: [
                     {
