@@ -28,3 +28,28 @@ npm run dev
 ## Deployment
 
 Pushed to main, automatically deployed to Vercel via GitHub integration.
+
+## Azure Deployment (Container Apps)
+
+Use the deployment script with shared Rigour infra defaults:
+
+- Resource Group: `rigour-rg`
+- ACR: `rigourrg`
+
+```bash
+# from rigour-mcp repo root
+./scripts/deploy-azure.sh
+```
+
+Optional overrides:
+
+```bash
+./scripts/deploy-azure.sh --app rigour-mcp --rg rigour-rg --location eastus --acr rigourrg
+```
+
+Optional MCP token secret:
+
+```bash
+export RIGOUR_MCP_TOKEN="$(openssl rand -hex 32)"
+./scripts/deploy-azure.sh
+```
