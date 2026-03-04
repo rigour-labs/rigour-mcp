@@ -10,36 +10,31 @@ export async function POST(request: NextRequest) {
         return new Response("Unauthorized", { status: 401 });
     }
 
-    try {
-        // Create a new server and transport for each request (stateless mode)
-        const mcpServer = createMcpServer();
-        const transport = new WebStandardStreamableHTTPServerTransport({
-            sessionIdGenerator: undefined, // Stateless mode - no session tracking needed
-            enableJsonResponse: true, // Return JSON responses instead of SSE
-        });
+    const mcpServer = createMcpServer();
+    const transport = new WebStandardStreamableHTTPServerTransport({
+        sessionIdGenerator: undefined, // Stateless mode - no session tracking needed
+        enableJsonResponse: true, // Return JSON responses instead of SSE
+    });
 
+    try {
         await mcpServer.connect(transport);
 
         // Handle the request using the native Request object
-        const response = await transport.handleRequest(request as unknown as Request);
-
-        // Clean up after request
-        request.signal.addEventListener("abort", async () => {
-            await transport.close();
-            await mcpServer.close();
-        });
-
-        return response;
-    } catch (error: any) {
+        return await transport.handleRequest(request as unknown as Request);
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "Internal server error";
         console.error("[MCP] Error handling request:", error);
         return Response.json({
             jsonrpc: "2.0",
             error: {
                 code: -32603,
-                message: error.message || "Internal server error"
+                message
             },
             id: null
         }, { status: 500 });
+    } finally {
+        await transport.close();
+        await mcpServer.close();
     }
 }
 
@@ -59,7 +54,7 @@ export async function GET(request: NextRequest) {
     }, { status: 405 });
 }
 
-export async function DELETE(request: NextRequest) {
+export async function DELETE() {
     // Stateless mode doesn't have sessions to delete
     return Response.json({
         jsonrpc: "2.0",
