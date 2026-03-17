@@ -96,6 +96,7 @@ if ! az account show >/dev/null 2>&1; then
   exit 1
 fi
 
+
 # Ensure Container Apps commands are available non-interactively.
 az extension add --name containerapp --upgrade --allow-preview true --only-show-errors >/dev/null
 
@@ -162,7 +163,7 @@ if az containerapp show --name "$APP_NAME" --resource-group "$RESOURCE_GROUP" >/
       --name "$APP_NAME" \
       --resource-group "$RESOURCE_GROUP" \
       --image "$IMAGE_URI" \
-      --set-env-vars NODE_ENV=production PORT="$TARGET_PORT" RIGOUR_MCP_TOKEN=secretref:mcp-token \
+      --set-env-vars NODE_ENV=production PORT="$TARGET_PORT" RIGOUR_MCP_MODE=control_plane RIGOUR_MCP_TOKEN=secretref:mcp-token \
       --min-replicas "$MIN_REPLICAS" \
       --max-replicas "$MAX_REPLICAS" \
       --output none
@@ -171,7 +172,7 @@ if az containerapp show --name "$APP_NAME" --resource-group "$RESOURCE_GROUP" >/
       --name "$APP_NAME" \
       --resource-group "$RESOURCE_GROUP" \
       --image "$IMAGE_URI" \
-      --set-env-vars NODE_ENV=production PORT="$TARGET_PORT" \
+      --set-env-vars NODE_ENV=production PORT="$TARGET_PORT" RIGOUR_MCP_MODE=control_plane \
       --min-replicas "$MIN_REPLICAS" \
       --max-replicas "$MAX_REPLICAS" \
       --output none
@@ -189,7 +190,7 @@ else
       --registry-username "$ACR_USERNAME" \
       --registry-password "$ACR_PASSWORD" \
       --secrets mcp-token="$RIGOUR_MCP_TOKEN" \
-      --env-vars NODE_ENV=production PORT="$TARGET_PORT" RIGOUR_MCP_TOKEN=secretref:mcp-token \
+      --env-vars NODE_ENV=production PORT="$TARGET_PORT" RIGOUR_MCP_MODE=control_plane RIGOUR_MCP_TOKEN=secretref:mcp-token \
       --min-replicas "$MIN_REPLICAS" \
       --max-replicas "$MAX_REPLICAS" \
       --output none
@@ -204,7 +205,7 @@ else
       --registry-server "$ACR_LOGIN_SERVER" \
       --registry-username "$ACR_USERNAME" \
       --registry-password "$ACR_PASSWORD" \
-      --env-vars NODE_ENV=production PORT="$TARGET_PORT" \
+      --env-vars NODE_ENV=production PORT="$TARGET_PORT" RIGOUR_MCP_MODE=control_plane \
       --min-replicas "$MIN_REPLICAS" \
       --max-replicas "$MAX_REPLICAS" \
       --output none

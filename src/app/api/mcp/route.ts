@@ -5,9 +5,15 @@ import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/
 
 export const dynamic = "force-dynamic";
 
+const CORS_HEADERS = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, Mcp-Session-Id",
+};
+
 export async function POST(request: NextRequest) {
     if (!isAuthorized(request)) {
-        return new Response("Unauthorized", { status: 401 });
+        return new Response("Unauthorized", { status: 401, headers: CORS_HEADERS });
     }
 
     const mcpServer = createMcpServer();
@@ -20,7 +26,19 @@ export async function POST(request: NextRequest) {
         await mcpServer.connect(transport);
 
         // Handle the request using the native Request object
-        return await transport.handleRequest(request as unknown as Request);
+        const response = await transport.handleRequest(request as unknown as Request);
+
+        // Inject CORS headers into the transport response
+        const headers = new Headers(response.headers);
+        for (const [key, value] of Object.entries(CORS_HEADERS)) {
+            headers.set(key, value);
+        }
+
+        return new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers,
+        });
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : "Internal server error";
         console.error("[MCP] Error handling request:", error);
@@ -31,7 +49,7 @@ export async function POST(request: NextRequest) {
                 message
             },
             id: null
-        }, { status: 500 });
+        }, { status: 500, headers: CORS_HEADERS });
     } finally {
         await transport.close();
         await mcpServer.close();
@@ -40,7 +58,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
     if (!isAuthorized(request)) {
-        return new Response("Unauthorized", { status: 401 });
+        return new Response("Unauthorized", { status: 401, headers: CORS_HEADERS });
     }
 
     // Stateless mode doesn't support GET for SSE streams
@@ -51,7 +69,7 @@ export async function GET(request: NextRequest) {
             message: "This MCP server runs in stateless mode. Use POST requests only."
         },
         id: null
-    }, { status: 405 });
+    }, { status: 405, headers: CORS_HEADERS });
 }
 
 export async function DELETE() {
@@ -63,16 +81,12 @@ export async function DELETE() {
             message: "This MCP server runs in stateless mode. No sessions to delete."
         },
         id: null
-    }, { status: 405 });
+    }, { status: 405, headers: CORS_HEADERS });
 }
 
 export async function OPTIONS() {
     return new Response(null, {
         status: 204,
-        headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type, Authorization, Mcp-Session-Id",
-        },
+        headers: CORS_HEADERS,
     });
 }

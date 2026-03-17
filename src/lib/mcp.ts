@@ -397,7 +397,13 @@ export function createMcpServer() {
     }
   );
 
-  server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: TOOL_DEFINITIONS }));
+  // Filter out local-only tools in control_plane mode — they can't execute remotely
+  // and showing them confuses agents into calling tools that always error.
+  const advertisedTools = HOSTED_MODE === "control_plane"
+    ? TOOL_DEFINITIONS.filter(t => !LOCAL_ONLY_TOOLS.has(t.name))
+    : TOOL_DEFINITIONS;
+
+  server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: advertisedTools }));
 
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const { name, arguments: rawArgs } = request.params;

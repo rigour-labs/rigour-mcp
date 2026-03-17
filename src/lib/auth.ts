@@ -4,8 +4,9 @@ const RIGOUR_MCP_TOKEN = process.env.RIGOUR_MCP_TOKEN;
 const NODE_ENV = process.env.NODE_ENV || "development";
 
 export function isAuthorized(request: NextRequest): boolean {
+    // If no token is configured, allow all requests (open access mode)
     if (!RIGOUR_MCP_TOKEN) {
-        return NODE_ENV !== "production";
+        return true;
     }
 
     // 1. Check Header
